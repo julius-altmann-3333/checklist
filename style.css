@@ -1,0 +1,46 @@
+body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        #new-task {
+            width: calc(100% - 110px);
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #add-task-btn, #delete-task-btn {
+            padding: 10px;
+            margin-left: 5px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #fff;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        li.finished {
+            text-decoration: line-through;
+            color: grey;
+        }
+        .task-text {
+            flex: 1; /* Take up remaining space */
+            margin-left: 5px;
+        }
+        .task-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        button.edit-btn, button.delete-btn {
+            margin-left: 5px;
+        }
