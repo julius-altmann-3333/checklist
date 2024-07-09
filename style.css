@@ -16,11 +16,17 @@ body {
             padding: 10px;
             margin-left: 5px;
         }
-        ul {
+        .category-options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 10px;
+        }
+        .task-list {
             list-style-type: none;
             padding: 0;
+            margin: 0;
         }
-        li {
+        .task-list li {
             background-color: #fff;
             margin: 10px 0;
             padding: 10px;
@@ -29,7 +35,7 @@ body {
             justify-content: space-between;
             align-items: center;
         }
-        li.finished {
+        .task-list li.finished {
             text-decoration: line-through;
             color: grey;
         }
