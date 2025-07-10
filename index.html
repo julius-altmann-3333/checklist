@@ -1,10 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="https://julius-altmann-3333.github.io/checklist/style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="https://julius-altmann-3333.github.io/checklist/style.css" />
     <title>Checklist</title>
+    <style>
+      /* Add minimal styling to ensure buttons and lists are usable on mobile */
+      body {
+        font-family: Arial, sans-serif;
+        padding: 1em;
+        max-width: 600px;
+        margin: auto;
+      }
+      input[type="text"] {
+        width: 70%;
+        padding: 0.5em;
+        font-size: 1em;
+      }
+      button {
+        padding: 0.5em 1em;
+        font-size: 1em;
+        margin-left: 0.3em;
+      }
+      .task-buttons button {
+        margin-left: 0.3em;
+      }
+      ul.task-list {
+        list-style: none;
+        padding-left: 0;
+      }
+      li.finished span.task-text {
+        text-decoration: line-through;
+        color: #777;
+      }
+    </style>
 </head>
 <body>
     <h1>Checklist</h1>
@@ -16,7 +46,7 @@
     </div>
 
     <div>
-        <input type="text" id="new-task" placeholder="Add a new task...">
+        <input type="text" id="new-task" placeholder="Add a new task..." />
         <button id="add-task-btn">Add Task</button>
         <button id="delete-task-btn">Delete Checked Tasks</button>
     </div>
@@ -37,90 +67,137 @@
     </div>
 
     <script>
-        function addTask() {
-            let taskText = document.getElementById('new-task').value;
-            if (taskText.trim() !== "") {
-                let li = document.createElement('li');
-                let checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        li.classList.add('finished');
-                    } else {
-                        li.classList.remove('finished');
-                    }
-                });
-                let span = document.createElement('span');
-                span.textContent = taskText;
-                span.classList.add('task-text');
-
-                let editButton = document.createElement('button');
-                editButton.textContent = 'Edit';
-                editButton.classList.add('edit-btn');
-                editButton.addEventListener('click', function() {
-                    if (!li.classList.contains('finished')) {
-                        let newTaskText = prompt('Edit task:', span.textContent);
-                        if (newTaskText !== null && newTaskText.trim() !== "") {
-                            span.textContent = newTaskText;
-                        }
-                    }
-                });
-
-                let deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.classList.add('delete-btn');
-                deleteButton.addEventListener('click', function() {
-                    li.remove();
-                });
-
-                let buttonContainer = document.createElement('div');
-                buttonContainer.classList.add('task-buttons');
-                buttonContainer.appendChild(editButton);
-                buttonContainer.appendChild(deleteButton);
-
-                li.appendChild(checkbox);
-                li.appendChild(span);
-                li.appendChild(buttonContainer);
-
-                // Get selected category
-                let category = document.querySelector('input[name="category"]:checked').value;
-
-                // Append task to the appropriate task list
-                switch (category) {
-                    case 'work':
-                        document.getElementById('work-task-list').appendChild(li);
-                        break;
-                    case 'personal':
-                        document.getElementById('personal-task-list').appendChild(li);
-                        break;
-                    case 'miscellaneous':
-                        document.getElementById('miscellaneous-task-list').appendChild(li);
-                        break;
-                    default:
-                        document.getElementById('miscellaneous-task-list').appendChild(li); // Default to Miscellaneous
-                        break;
-                }
-
-                document.getElementById('new-task').value = '';
-            }
-        }
-
-        document.getElementById('add-task-btn').addEventListener('click', addTask);
-
-        document.getElementById('new-task').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                addTask();
-            }
-        });
-
-        document.getElementById('delete-task-btn').addEventListener('click', function() {
-            let tasks = document.querySelectorAll('.task-list li');
-            tasks.forEach(function(task) {
-                if (task.querySelector('input[type="checkbox"]').checked) {
-                    task.remove();
-                }
+      // Helper function to save tasks to localStorage
+      function saveTasks() {
+        const categories = ['work', 'personal', 'miscellaneous'];
+        const data = {};
+        categories.forEach(cat => {
+          const list = document.getElementById(cat + '-task-list');
+          const tasks = [];
+          list.querySelectorAll('li').forEach(li => {
+            tasks.push({
+              text: li.querySelector('span.task-text').textContent,
+              finished: li.classList.contains('finished'),
             });
+          });
+          data[cat] = tasks;
         });
+        localStorage.setItem('checklistTasks', JSON.stringify(data));
+      }
+
+      // Helper function to create a task list item
+      function createTaskItem(task) {
+        const li = document.createElement('li');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.finished;
+        if (task.finished) {
+          li.classList.add('finished');
+        }
+        checkbox.addEventListener('change', function () {
+          if (this.checked) {
+            li.classList.add('finished');
+          } else {
+            li.classList.remove('finished');
+          }
+          saveTasks();
+        });
+
+        const span = document.createElement('span');
+        span.textContent = task.text;
+        span.classList.add('task-text');
+
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.classList.add('edit-btn');
+        editButton.addEventListener('click', function () {
+          if (!li.classList.contains('finished')) {
+            let newTaskText = prompt('Edit task:', span.textContent);
+            if (newTaskText !== null && newTaskText.trim() !== '') {
+              span.textContent = newTaskText.trim();
+              saveTasks();
+            }
+          }
+        });
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.classList.add('delete-btn');
+        deleteButton.addEventListener('click', function () {
+          li.remove();
+          saveTasks();
+        });
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('task-buttons');
+        buttonContainer.appendChild(editButton);
+        buttonContainer.appendChild(deleteButton);
+
+        li.appendChild(checkbox);
+        li.appendChild(span);
+        li.appendChild(buttonContainer);
+
+        return li;
+      }
+
+      function addTask() {
+        const input = document.getElementById('new-task');
+        let taskText = input.value.trim();
+        if (taskText !== '') {
+          const category = document.querySelector('input[name="category"]:checked').value;
+          const task = { text: taskText, finished: false };
+          const li = createTaskItem(task);
+
+          const listElement = document.getElementById(category + '-task-list');
+          listElement.appendChild(li);
+
+          input.value = '';
+          saveTasks();
+        }
+      }
+
+      // Load tasks from localStorage on page load
+      function loadTasks() {
+        const data = localStorage.getItem('checklistTasks');
+        if (data) {
+          const tasksData = JSON.parse(data);
+          for (const category in tasksData) {
+            if (tasksData.hasOwnProperty(category)) {
+              const listElement = document.getElementById(category + '-task-list');
+              listElement.innerHTML = ''; // Clear existing tasks
+              tasksData[category].forEach(task => {
+                const li = createTaskItem(task);
+                listElement.appendChild(li);
+              });
+            }
+          }
+        }
+      }
+
+      document.getElementById('add-task-btn').addEventListener('click', addTask);
+
+      document.getElementById('new-task').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          addTask();
+        }
+      });
+
+      document.getElementById('delete-task-btn').addEventListener('click', function () {
+        const tasks = document.querySelectorAll('.task-list li');
+        let removed = false;
+        tasks.forEach(function (task) {
+          const checkbox = task.querySelector('input[type="checkbox"]');
+          if (checkbox.checked) {
+            task.remove();
+            removed = true;
+          }
+        });
+        if (removed) saveTasks();
+      });
+
+      // Load tasks initially
+      loadTasks();
     </script>
 </body>
 </html>
